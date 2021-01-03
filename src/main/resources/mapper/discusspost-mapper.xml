@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--声明完后表示 这个配置文件是为这个接口服务的-->
+<mapper namespace="com.nowcoder.community.dao.DiscussPostMapper">
+
+<!--    提取字段 共用-->
+    <sql id="selectFields">
+            id,user_id,title,content,type,status,create_time,comment_count,score
+    </sql>
+
+    <select id="selectDiscussPosts" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+--         2表示拉黑
+        where status!=2
+        <if test="userId!=0">
+--         前面是数据库字段 后面是方法的参数
+        and user_id=#{userId}
+        </if>
+--         type倒序 0普通帖子 1置顶
+        order by type desc,create_time desc
+--         limit后面如果只写一个整数n，那就是查询的前n条记录；
+--         如果后面带2个整数n 和 m，
+--         那么第一个数n就是查询出来队列的起点（从0开始），
+--         第二个是m是统计的总数目
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="selectDiscussPostRows" resultType="int">
+        select count(id)
+        from discuss_post
+        where status!=2
+        <if test="userId!=0">
+            and user_id=#{userId}
+        </if>
+    </select>
+
+
+
+</mapper>
