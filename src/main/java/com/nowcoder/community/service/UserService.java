@@ -1,6 +1,8 @@
 package com.nowcoder.community.service;
 
+import com.nowcoder.community.dao.LoginTicketMapper;
 import com.nowcoder.community.dao.UserMapper;
+import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
@@ -19,6 +21,10 @@ import java.util.Random;
 
 @Service
 public class UserService implements CommunityConstant {
+
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
+
     @Autowired
     private UserMapper userMapper;
 
@@ -117,5 +123,119 @@ public class UserService implements CommunityConstant {
             //不等就gg
             return ACTIVATION_FAILURE;
         }
+    }
+
+    public Map<String,Object> login(String username,String password,int expiredSeconds){
+
+        Map<String,Object> map=new HashMap<>();
+
+        //空值处理
+        if(StringUtils.isBlank(username)){
+            map.put("usernameMsg","账号不能为空");
+            return map;
+        }
+        if(StringUtils.isBlank(password)){
+            map.put("passwordMsg","密码不能为空");
+            return map;
+        }
+
+        //验证账号
+        User user=userMapper.selectByName(username);
+        if(user==null){
+            map.put("usernameMsg","该账号不存在");
+            return map;
+        }
+        //验证状态
+        if(user.getStatus()==0){
+            map.put("usernameMsg","该账号未激活");
+            return map;
+        }
+        //验证密码
+        password=CommunityUtil.md5(password+user.getSalt());
+        if(!user.getPassword().equals(password)){
+            map.put("passwordMsg","密码不正确");
+            return map;
+        }
+
+        //生成登录凭证
+        LoginTicket loginTicket=new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + 1000 *expiredSeconds));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+
+        map.put("ticket",loginTicket.getTicket());
+        return map;
+    }
+
+    //忘记密码
+    public Map<String,Object> resetPassword(String email,String password){
+        Map<String,Object> map=new HashMap<>();
+
+        //空值处理
+        if(StringUtils.isBlank(email)){
+            map.put("emailMsg","邮箱不能为空");
+            return map;
+        }
+        if(StringUtils.isBlank(password)){
+            map.put("passwordMsg","密码不能为空");
+            return map;
+        }
+
+        //验证邮箱
+        User user=userMapper.selectByEmail(email);
+
+        if(user==null){
+            map.put("emailMsg","邮箱错误");
+            return map;
+        }
+
+        //重置密码
+        password=CommunityUtil.md5(password+user.getSalt());
+
+        userMapper.updatePassword(user.getId(),password);
+
+        map.put("user",user);
+        return map;
+
+    }
+
+    public void logout(String ticket){
+        loginTicketMapper.updateStatus(ticket,1);
+    }
+
+    public LoginTicket findLoginTicket(String ticket) {
+        return loginTicketMapper.selectByTicket(ticket);
+    }
+
+    //更新修改头像的路径
+    public int updateHeader(int userId,String headerUrl){
+        return userMapper.updateHeader(userId,headerUrl);
+    }
+
+    //更改密码
+    public Map<String,Object> updatePassword(int userId,String oldPassword,String newPassword){
+        Map<String,Object> map=new HashMap<>();
+        if(StringUtils.isBlank(oldPassword)){
+            map.put("oldPasswordMsg","原密码不能为空");
+            return map;
+        }
+        if(StringUtils.isBlank(newPassword)){
+            map.put("newPasswordMsg","新密码不能为空");
+            return map;
+        }
+        //验证原始密码
+        User user=userMapper.selectById(userId);
+        oldPassword=CommunityUtil.md5(oldPassword+user.getSalt());
+        if(!oldPassword.equals(user.getPassword())){
+            map.put("oldPasswordMsg","原密码错误");
+            return map;
+        }
+
+        newPassword=CommunityUtil.md5(newPassword+user.getSalt());
+        userMapper.updatePassword(user.getId(), newPassword);
+
+        return map;
     }
 }
