@@ -15,4 +15,9 @@ public interface DiscussPostMapper {
     //需要写动态sql且只有一个参数时 必须写别名否则报错
     int selectDiscussPostRows(@Param("userId") int userId);
 
+
+    int insertDiscussPost(DiscussPost discussPost);
+
+    DiscussPost selectDiscussPostById(int id);
+
 }
