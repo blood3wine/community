@@ -4,7 +4,9 @@ import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +20,16 @@ import java.util.Map;
 
 //Controller没有访问路径 直接访问方法
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
     @Autowired
     private DiscussPostService discussPostService;
     //查到的只是userid 再把UserService注入进来 根据id查user
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LikeService likeService;
 
 
 
@@ -43,9 +48,15 @@ public class HomeController {
             if(list!=null){
                 Map<String,Object>map=new HashMap<>();
                 map.put("post",post);
-                //裂开 是getuserid 不是getid
+
                 User user=userService.findUserById(post.getUserId());
                 map.put("user",user);
+
+                //增加 首页点赞数量 功能
+                //帖子类型，帖子id
+                long likeCount =likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount",likeCount);
+
                discussPosts.add(map);
             }
         }

@@ -42,7 +42,7 @@
 									<img th:src="${loginUser.headerUrl}" class="rounded-circle" style="width:30px;"/>
 								</a>
 								<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-									<a class="dropdown-item text-center" href="site/profile.html">个人主页</a>
+									<a class="dropdown-item text-center" th:href="@{|/user/profile/${loginUser.id}|}">个人主页</a>
 									<a class="dropdown-item text-center" th:href="@{/user/setting}">账号设置</a>
 									<a class="dropdown-item text-center" th:href="@{/logout}">退出登录</a>
 									<div class="dropdown-divider"></div>
@@ -124,7 +124,7 @@
 <!--																		model 里的discussPosts 加上变量名map指代这个变量-->
 					<li class="media pb-3 pt-3 mb-3 border-bottom" th:each="map:${discussPosts}">
 <!--						显示 用户头像-->
-						<a href="site/profile.html">
+						<a th:href="@{|/user/profile/${map.user.id}|}">
 							<!-- thymeleaf能识别 map是hashmap类型 调用get方法 以user为key去访问
 							url是自定义的bean 调用get方法
 							其实访问的是map.get(”user“)-》User->user.getHeadUrl()->headUrl-->
@@ -136,14 +136,16 @@
 <!--								text普通文本 utext可以显示转义字符
 									&lt; 会显示<
 									-->
-								<a href="#" th:href="@{|/discuss/detail/${map.post.id}|}" th:utext="${map.post.title}">备战春招，面试刷题跟他复习，一个月全搞定！</a>
+								<a th:href="@{|/discuss/detail/${map.post.id}|}" th:utext="${map.post.title}">备战春招，面试刷题跟他复习，一个月全搞定！</a>
 								<span class="badge badge-secondary bg-primary" th:if="${map.post.type==1}">置顶</span>
 								<span class="badge badge-secondary bg-danger" th:if="${map.post.status==1}">精华</span>
 							</h6>
 							<div class="text-muted font-size-12">
 								<u class="mr-3" th:utext="${map.user.username}">寒江雪</u> 发布于 <b th:text="${#dates.format(map.post.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b>
 								<ul class="d-inline float-right">
-									<li class="d-inline ml-2">赞 11</li>
+									<li class="d-inline ml-2">
+										赞 <span th:text="${map.likeCount}">11</span>
+									</li>
 									<li class="d-inline ml-2">|</li>
 									<li class="d-inline ml-2">回帖 <span  th:text="${map.post.commentCount}">7</span></li>
 								</ul>

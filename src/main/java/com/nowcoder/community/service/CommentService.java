@@ -52,7 +52,8 @@ public class CommentService {
         int rows=commentMapper.insertComment(comment);
         //更新帖子评论数量
         if(comment.getEntityType()==ENTITY_TYPE_POST){
-            int count = commentMapper.selectCountByEntity(comment.getEntityType(), comment.getId());
+            int count = commentMapper.selectCountByEntity(comment.getEntityType(), comment.getEntityId());
+            System.out.println(comment.getEntityType()+" "+count+" "+comment.getId());
             //根据帖子id把数量更新
             discussPostService.updateCommentCount(comment.getEntityId(),count);
         }
@@ -60,4 +61,15 @@ public class CommentService {
         return rows;
 
     }
+
+    public List<Comment> findCommentsByUserId(int entityType,int userId,int offset,int limit){
+        return commentMapper.selectCommentsByUserId(entityType, userId, offset, limit);
+    }
+
+    public int findCommentCountByUserId(int entityType,int useId){
+        return commentMapper.selectCountByUserId(entityType, useId);
+    }
+
+
+
 }

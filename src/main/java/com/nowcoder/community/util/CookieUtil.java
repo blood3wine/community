@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class CookieUtil {
 
+    //从cookie中获取凭证
     public static String getValue(HttpServletRequest request, String name) {
         if (request == null || name == null) {
             throw new IllegalArgumentException("参数为空!");
