@@ -22,4 +22,6 @@ public interface CommentMapper {
 
     //根据用户id 查发了多少评论
     int selectCountByUserId(int entityType,int userId);
+
+    Comment selectCommentById(int id);
 }

@@ -1,9 +1,7 @@
 package com.nowcoder.community.controller;
 
-import com.nowcoder.community.entity.Comment;
-import com.nowcoder.community.entity.DiscussPost;
-import com.nowcoder.community.entity.Page;
-import com.nowcoder.community.entity.User;
+import com.nowcoder.community.entity.*;
+import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.service.CommentService;
 import com.nowcoder.community.service.DiscussPostService;
 import com.nowcoder.community.service.LikeService;
@@ -25,6 +23,9 @@ import java.util.*;
 @Controller
 @RequestMapping("/discuss")
 public class DiscussPostController implements CommunityConstant {
+
+    @Autowired
+    private EventProducer eventProducer;
 
     @Autowired
     private LikeService likeService;
@@ -57,6 +58,15 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setCreateTime(new Date());
         //登录了就调service去保存这个帖子
         discussPostService.addDiscussPost(discussPost);
+
+        //触发发帖事件
+        Event event=new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(discussPost.getId());
+        eventProducer.fireEvent(event);
+
 
         return CommunityUtil.getJSONString(0,"发布成功");
     }

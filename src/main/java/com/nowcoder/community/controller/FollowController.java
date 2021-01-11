@@ -1,8 +1,10 @@
 package com.nowcoder.community.controller;
 
 import com.nowcoder.community.annotation.LoginRequired;
+import com.nowcoder.community.entity.Event;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.service.FollowService;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityConstant;
@@ -26,8 +28,12 @@ public class FollowController implements CommunityConstant {
 
     @Autowired
     private HostHolder hostHolder;
+
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private EventProducer eventProducer;
 
     @RequestMapping(path = "/follow",method = RequestMethod.POST)
     @ResponseBody
@@ -36,6 +42,18 @@ public class FollowController implements CommunityConstant {
         User user= hostHolder.getUser();
 
         followService.follow(user.getId(), entityType,entityId);
+
+        //触发关注事件
+        Event event=new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        //链接点进去应该是关注你的人的主页,就不用set postId了
+        eventProducer.fireEvent(event);
+
+
         return CommunityUtil.getJSONString(0,"已关注");
     }
 

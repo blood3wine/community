@@ -31,6 +31,13 @@ public class ServiceLogAspect {
         //获取request
         //返回值 得到子类型ServletRequestAttributes，通过attributes获得request
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        //特殊调用 不是常规的，这时候不去记日志，或者记日志不记ip
+        if(attributes==null){
+            return;
+
+        }
+
         HttpServletRequest request = attributes.getRequest();
         //通过request获取ip地址
         String ip = request.getRemoteHost();

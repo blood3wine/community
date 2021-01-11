@@ -70,6 +70,10 @@ public class CommentService {
         return commentMapper.selectCountByUserId(entityType, useId);
     }
 
+    public Comment findCommentById(int id){
+        return commentMapper.selectCommentById(id);
+    }
+
 
 
 }
