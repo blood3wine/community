@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -187,6 +188,7 @@ public class LoginController implements CommunityConstant {
     @RequestMapping(path = "/logout",method = RequestMethod.GET)
     public String logout(@CookieValue("ticket") String ticket){
         userService.logout(ticket);
+        SecurityContextHolder.clearContext();
         return "redirect:/login";
 
 
@@ -226,6 +228,7 @@ public class LoginController implements CommunityConstant {
 
     }
 
+    // 重置密码
     @RequestMapping(path = "/forget/password",method = RequestMethod.POST)
     public String resetPassword(String email,String password,String code,HttpSession session,Model model){
         //验证验证码是否正确
